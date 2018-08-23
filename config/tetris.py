@@ -5,10 +5,13 @@ HORIZONTAL_BLOCKS = 10
 VERTICAL_BLOCKS = 20
 DROP_SPEED = 1 # second
 SPAWN_POS = (3, 0)
-GRAVITY = 1000 # milliseconds between each move down
-DEFAULT_DELAY = 500
-MAX_DELAY = 2200 # milliseconds
-DELAY_LEEWAY = 300 # milliseconds
+
+MULTIPLIER = 1
+
+GRAVITY = 1000/MULTIPLIER # milliseconds between each move down
+DEFAULT_DELAY = 500/MULTIPLIER
+MAX_DELAY = 2200/MULTIPLIER # milliseconds
+DELAY_LEEWAY = 300/MULTIPLIER # milliseconds
 STEP_RATE = 20 # per second
 
 

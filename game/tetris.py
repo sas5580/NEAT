@@ -20,6 +20,7 @@ class Tetris:
         self.swapped = False
         self.piece_done = False
         self.game_over = False
+
         self.last_step = 0 # time passed since alst grav
         self.done_delay = DEFAULT_DELAY # amount to delay before next piece
         self.last_ev = 0 # last time piece was moved
