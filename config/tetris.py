@@ -1,6 +1,6 @@
 # Game
 HORIZONTAL_BLOCKS = 10
-VERTICAL_BLOCKS = 21
+VERTICAL_BLOCKS = 20
 DROP_SPEED = 1 # second
 SPAWN_POS = (3, 0)
 GRAVITY = 1000 # milliseconds between each move down

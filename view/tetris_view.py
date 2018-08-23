@@ -36,7 +36,7 @@ class TetrisView:
         
         board_surf = pg.Surface((BLOCK_SIZE*HORIZONTAL_BLOCKS, BLOCK_SIZE*VERTICAL_BLOCKS))
 
-        for y, row in enumerate(self.game.get_board()[1:]):
+        for y, row in enumerate(self.game.get_board()):
             for x, block in enumerate(row):
                 rect = (x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
                 if block is None:
