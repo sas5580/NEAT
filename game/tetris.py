@@ -17,6 +17,7 @@ class Tetris:
         self.held_piece = None
         self.swapped = False
         self.piece_done = False
+        self.game_over = False
         self.last_tick = 0 # time passed since alst grav
         self.done_delay = DEFAULT_DELAY # amount to delay before next piece
         self.last_ev = 0 # last time piece was moved
@@ -30,6 +31,11 @@ class Tetris:
     def spawn_piece(self):
         piece_type = self.piece_queue.popleft()
         self.cur_piece = Piece(piece_type, SPAWN_POS)
+
+        if not self.cur_piece.check_rotation_pos_fits(self.board):
+            self.game_over = True
+            self.cur_piece = None
+            print('GAME OVER')
 
     def lower_piece(self):
         try:
@@ -76,6 +82,7 @@ class Tetris:
     def settle_piece(self):
         if not self.check_piece_done():
             raise Exception('Attempting to settle piece that is not at bottom')
+
         self.board = self.cur_piece.add_to_board(self.board)
         self.clear_lines()
         self.check_queue()
