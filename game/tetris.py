@@ -2,11 +2,11 @@ from random import shuffle
 from collections import deque
 from copy import deepcopy
 from time import time
-import pygame.key
 
 from config.tetris import HORIZONTAL_BLOCKS, VERTICAL_BLOCKS, SPAWN_POS, GRAVITY, MAX_DELAY, DELAY_LEEWAY, DEFAULT_DELAY
 from game.piece import Piece
 from game.piece_data import PieceType, RotationType
+from game.actions import Action
 
 
 class Tetris:
@@ -113,27 +113,30 @@ class Tetris:
         self.check_queue()
         self.spawn_piece()
 
-    def event(self, event):
-        # if something happens update last_ev
-        action = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                action = self.move_piece_left()
-            elif event.key == pygame.K_RIGHT:
-                action = self.move_piece_right()
-            elif event.key == pygame.K_SPACE:
-                self.hard_drop()
-            elif event.key == pygame.K_DOWN:
-                self.lower_piece()
-            elif event.key == pygame.K_UP:
-                action = self.rotate_piece_clockwise()
-            elif event.key == pygame.K_LSHIFT:
-                self.swap_help_cur_piece()
+    def action(self, action):
+        if self.game_over: return
+
+        action_complete = False
+
+        if action == Action.MOVE_LEFT:
+            action = self.move_piece_left()
+        elif action == Action.MOVE_RIGHT:
+            action = self.move_piece_right()
+        elif action == Action.HARD_DROP:
+            self.hard_drop()
+        elif action == Action.MOVE_DOWN:
+            self.lower_piece()
+        elif action == Action.ROTATE:
+            action = self.rotate_piece_clockwise()
+        elif action == Action.SWAP_HELD:
+            self.swap_help_cur_piece()
         
-        if action:
+        if action_complete:
             self.last_ev = time()*1000
 
     def step(self, clock):
+        if self.game_over: return
+
         if self.piece_done:
             if self.last_ev < DELAY_LEEWAY:
                 self.done_delay += DELAY_LEEWAY

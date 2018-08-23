@@ -4,8 +4,7 @@ from pygame.locals import *
 from config.tetris import *
 from game.tetris import Tetris
 from game.piece_data import PieceType
-
-VERTICAL_BLOCKS -= 1
+from game.actions import Action
 
 PIECE_COLORS = {
     PieceType.I: (80, 248, 253),
@@ -55,7 +54,22 @@ class TetrisView:
         return self.surface
     
     def on_event(self, ev):
-        self.game.event(ev)
+        action = None
+        if ev.type == pg.KEYDOWN:
+            if ev.key == pg.K_UP:
+                action = Action.ROTATE
+            elif ev.key == pg.K_RIGHT:
+                action = Action.MOVE_RIGHT
+            elif ev.key == pg.K_DOWN:
+                action = Action.MOVE_DOWN
+            elif ev.key == pg.K_LEFT:
+                action = Action.MOVE_LEFT
+            elif ev.key == pg.K_SPACE:
+                action = Action.HARD_DROP
+            elif ev.key == pg.K_LSHIFT:
+                action = Action.SWAP_HELD
+
+        if action: self.game.action(action)
 
     def loop(self, clock):
         self.game.step(clock)
