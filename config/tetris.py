@@ -9,6 +9,7 @@ GRAVITY = 1000 # milliseconds between each move down
 DEFAULT_DELAY = 500
 MAX_DELAY = 2200 # milliseconds
 DELAY_LEEWAY = 300 # milliseconds
+STEP_RATE = 20 # per second
 
 
 # Display

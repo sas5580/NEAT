@@ -2,7 +2,7 @@ import pygame as pg
 from pygame.locals import *
 from pygame.time import Clock
 
-from config.game import WINDOW_HEIGHT, WINDOW_WIDTH, FPS
+from config.game import WINDOW_HEIGHT, WINDOW_WIDTH
 from view.tetris_view import TetrisView
 
 class GameView:
@@ -10,7 +10,6 @@ class GameView:
         self._running = True
         self.size = WINDOW_WIDTH, WINDOW_HEIGHT
         self._display = None
-        self.clock = Clock()
         self.tetris_view = None
     
     def on_init(self):
@@ -25,7 +24,7 @@ class GameView:
         self.tetris_view.on_event(event)
 
     def on_loop(self):
-        self.tetris_view.loop(self.clock)
+        self.tetris_view.loop()
 
     def on_render(self):
         self._display.blit(self.tetris_view.draw(), (0, 0))
@@ -46,7 +45,6 @@ class GameView:
                 self.on_event(event)
             self.on_loop()
             self.on_render()
-            self.clock.tick(FPS)
         self.on_cleanup()
 
         

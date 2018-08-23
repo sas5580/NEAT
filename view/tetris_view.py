@@ -57,5 +57,5 @@ class TetrisView:
 
         if action: self.game.action(action)
 
-    def loop(self, clock):
-        self.game.step(clock)
+    def loop(self):
+        self.game.step()

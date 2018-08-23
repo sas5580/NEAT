@@ -2,8 +2,9 @@ from random import shuffle
 from collections import deque
 from copy import deepcopy
 from time import time
+from pygame.time import Clock
 
-from config.tetris import HORIZONTAL_BLOCKS, VERTICAL_BLOCKS, SPAWN_POS, GRAVITY, MAX_DELAY, DELAY_LEEWAY, DEFAULT_DELAY
+from config.tetris import HORIZONTAL_BLOCKS, VERTICAL_BLOCKS, SPAWN_POS, GRAVITY, MAX_DELAY, DELAY_LEEWAY, DEFAULT_DELAY, STEP_RATE
 from game.piece import Piece
 from game.piece_data import PieceType, RotationType
 from game.actions import Action
@@ -11,6 +12,7 @@ from game.actions import Action
 
 class Tetris:
     def __init__(self):
+        self.clock = Clock()
         self.board = [[None for _ in range(HORIZONTAL_BLOCKS)] for _ in  range(VERTICAL_BLOCKS)]
         self.piece_queue = deque()
         self.cur_piece = None
@@ -18,7 +20,7 @@ class Tetris:
         self.swapped = False
         self.piece_done = False
         self.game_over = False
-        self.last_tick = 0 # time passed since alst grav
+        self.last_step = 0 # time passed since alst grav
         self.done_delay = DEFAULT_DELAY # amount to delay before next piece
         self.last_ev = 0 # last time piece was moved
     
@@ -141,34 +143,41 @@ class Tetris:
         if action_complete:
             self.last_ev = time()*1000
 
-    def step(self, clock):
-        if self.game_over: return
+    def check_time_to_step(self):
+        if self.game_over:
+            return False
 
         if self.piece_done:
             if self.last_ev < DELAY_LEEWAY:
                 self.done_delay += DELAY_LEEWAY
                 if self.done_delay < MAX_DELAY:
-                    return
+                    return False
             if not self.check_piece_done():
                 self.piece_done = False
-            else:
-                self.done_delay = DEFAULT_DELAY
-        elif self.last_tick < GRAVITY:
+
+        elif self.last_step < GRAVITY:
             self.done_delay = 0
-            self.last_tick += clock.get_time()
-            return
-
-        self.last_tick = 0
-
-        if self.piece_done:
-            self.settle_piece()
-            self.piece_done = False
+            self.last_step += self.clock.get_time()
+            return False
         
-        elif self.check_piece_done():
-            self.piece_done = True
+        self.done_delay = DEFAULT_DELAY
+        self.last_step = 0
 
-        else:
-            self.lower_piece()
+        return True
+
+    def step(self):
+        if self.check_time_to_step():
+            if self.piece_done:
+                self.settle_piece()
+                self.piece_done = False
+
+            elif self.check_piece_done():
+                self.piece_done = True
+
+            else:
+                self.lower_piece()
+
+        self.clock.tick(STEP_RATE)
 
     def get_projection(self):
         if not self.cur_piece: return
