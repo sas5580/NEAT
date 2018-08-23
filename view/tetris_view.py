@@ -6,20 +6,6 @@ from game.tetris import Tetris
 from game.piece_data import PieceType
 from game.actions import Action
 
-PIECE_COLORS = {
-    PieceType.I: (80, 248, 253),
-    PieceType.J: (47, 2, 251), 
-    PieceType.L: (248, 168, 6),
-    PieceType.O: (252, 252, 1),
-    PieceType.S: (67, 255, 0),
-    PieceType.T: (153, 0, 249),
-    PieceType.Z: (245, 11, 3),
-    PieceType.G: (150, 150, 150)
-}
-
-EMPTY_BLOCK_COLORS = ((30, 30, 30), (70, 70, 70))
-
-GRID_LINE_COLOR = (20, 20, 20)
 
 class TetrisView:
     def __init__(self):
