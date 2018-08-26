@@ -9,7 +9,7 @@ class Genome:
     def __init__(self):
         self.nodes = set()
         self.connections = dict()
-        self.bias_node = NodeGene(NodeGene.Type.BIAS)
+        self.bias_node = NodeGene(NodeGene.Type.BIAS, 0)
 
     def _addNode(self, node):
         if node in self.nodes:
