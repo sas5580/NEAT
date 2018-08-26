@@ -22,10 +22,10 @@ class NodeGene:
         self.id = NodeGene.ID_COUNT
         self.type = type_
         self.depth = depth
-    
+
     def __hash__(self):
         return self.id
-    
+
     def __eq__(self, other):
         return self.id == other.id
 

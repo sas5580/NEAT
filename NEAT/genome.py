@@ -51,11 +51,11 @@ class Genome:
             node1, node2 = NodeGene.orientNodes(sample(node_set, 1)[0], sample(node_set, 1)[0])
 
         self._addConnection(ConnectionGene(node1, node2))
-    
+
     def deleteConnectionMutation(self):
         if not self.connections:
             return
-        
+
         connection = choice(list(self.connections.values()))
         del self.connections[connection.innovation]
 
@@ -68,7 +68,7 @@ class Genome:
                 found_in = True
             if connection.out == conn.in_ or connection.out == conn.out:
                 found_out = True
-        
+
         if connection.in_ == NodeGene.Type.HIDDEN and not found_in:
             self.nodes.remove(connection.in_)
 
@@ -98,7 +98,7 @@ class Genome:
 
         self._addConnection(ConnectionGene(connection.in_, new_node, 1.0))
         self._addConnection(ConnectionGene(new_node, connection.out, connection.weight))
-    
+
     def deleteNodeMutation(self):
         first_non_io_node_ind = 0
         nodes = list(self.nodes)
@@ -155,7 +155,8 @@ class Genome:
             if innovation in genome2.connections: # matching case
                 if not connection.enabled or not genome2.connections[innovation].enabled:
                     disable_prob = DISABLE_PROB_IF_PARENT_DISABLED
-                
+
+                # TODO: Parameterizing this prob might improve performance
                 if uniform(0, 1) < 0.5:
                     weight = connection.weight
                 else:
@@ -176,7 +177,6 @@ class Genome:
             child._addConnection(ConnectionGene(
                 connection.in_, connection.out, weight, disable_prob
             ))
-        
         return child
 
     @staticmethod
