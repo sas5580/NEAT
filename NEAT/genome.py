@@ -139,7 +139,7 @@ class Genome:
             if not connection.enabled:
                 connection.enable()
                 break
-    
+
     def weightsMutation(self):
         for connection in self.connections.values():
             if not connection.frozen:
