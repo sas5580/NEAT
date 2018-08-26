@@ -178,3 +178,35 @@ class Genome:
             ))
         
         return child
+
+    @staticmethod
+    def compatibility(genome1, genome2):
+        con_ind1 = con_ind2 = 0
+        cons1, cons2 = list(genome1.connections.keys()), list(genome2.connections.keys())
+        n1, n2 = len(genome1.connections), len(genome2.connections)
+
+
+        disjoint_count = excess_count = matching_count = weight_diff = 0
+
+        while con_ind1 < n1 or con_ind2 < n2:
+            if con_ind1 >= n1:
+                excess_count += 1
+                con_ind2 += 1
+            elif con_ind2 >= n2:
+                excess_count += 1
+                con_ind1 += 1
+            else:
+                ino1, ino2 = cons1[con_ind1], cons2[con_ind2]
+                if ino1 == ino2:
+                    matching_count += 1
+                    weight_diff += abs(genome1.connections[ino1].weight - genome2.connections[ino2].weight)
+                    con_ind1 += 1
+                    con_ind2 += 1
+                elif ino1 < ino2:
+                    disjoint_count += 1
+                    con_ind1 += 1
+                elif ino1 > ino2:
+                    disjoint_count += 1
+                    con_ind2 += 1
+
+        return DISJOINT_WEIGHT*disjoint_count + EXCESS_WEIGHT*excess_count + WEIGHT_DIFFERENCE_WEIGHT*weight_diff/matching_count
