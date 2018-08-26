@@ -6,21 +6,43 @@ from NEAT.node_gene import NodeGene
 from NEAT.connection_gene import ConnectionGene
 
 class Genome:
+    INPUT_NODES = []
+    OUTPUT_NODES = []
+    BIAS_NODE = None
+
+    @classmethod
+    def init_io_nodes(cls, n_input, n_ouput):
+        cls.BIAS_NODE = NodeGene(NodeGene.Type.BIAS, 0)
+        for _ in range(n_input):
+            cls.INPUT_NODES.append(NodeGene(NodeGene.Type.INPUT, 0))
+        for _ in range(n_ouput):
+            cls.INPUT_NODES.append(NodeGene(NodeGene.Type.OUTPUT, 1))
+
     def __init__(self):
         self.nodes = set()
         self.connections = dict()
-        self.bias_node = NodeGene(NodeGene.Type.BIAS, 0)
+        self.bias_node = Genome.BIAS_NODE
+
+    def basic_init(self):
+        for inode in Genome.INPUT_NODES:
+            self._addNode(inode)
+            for onode in Genome.OUTPUT_NODES:
+                self._addNode(onode)
+                self._addConnection(ConnectionGene(inode, onode))
 
     def _addNode(self, node):
         if node in self.nodes:
             raise Exception(f'Adding exisitng node {node} to genome')
         self.nodes.add(node)
-    
+
     def _addConnection(self, connection):
         if connection.innovation in self.connections:
             raise Exception(f'Adding exsting connection')
+        # TODO: Remove if not causing problems and slowing down
+        if connection.in_ not in self.nodes.union({self.bias_node}) or connection.out not in self.nodes.union({self.bias_node}):
+            raise Exception('Attempting to add connection to nodes not in genome')
         self.connections[connection.innovation] = connection
-    
+
     def _isFullyConnected(self):
         inp = out = hidden = 0
         for node in self.nodes:
