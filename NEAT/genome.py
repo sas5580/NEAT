@@ -1,7 +1,8 @@
 from random import sample, choice, uniform
 
 from NEAT.config import DISABLE_PROB_IF_PARENT_DISABLED, EXCESS_WEIGHT, DISJOINT_WEIGHT, WEIGHT_DIFFERENCE_WEIGHT, \
-    ADD_CONNECTION_MUTATION_ATTEMPTS, ADD_NODE_MUTATION_ATTEMPTS
+    ADD_CONNECTION_MUTATION_ATTEMPTS, ADD_NODE_MUTATION_ATTEMPTS, MUTATE_ADD_LINK_PROB, MUTATE_ADD_NODE_PROB, MUTATE_DELETE_LINK_PROB, \
+    MUTATE_DELETE_NODE_PROB, MUTATE_TOGGLE_ENABLE_PROB, MUTATE_WEIGHTS_PROB, MUTTE_RENABLE_PROB
 from NEAT.node_gene import NodeGene
 from NEAT.connection_gene import ConnectionGene
 
@@ -166,6 +167,42 @@ class Genome:
         for connection in self.connections.values():
             if not connection.frozen:
                 connection.mutateWeight()
+
+    def mutate_one(self):
+        if not self.connections:
+            self.addConnectionMutation()
+        elif uniform(0, 1) < MUTATE_WEIGHTS_PROB:
+            self.weightsMutation()
+        elif uniform(0, 1) < MUTATE_ADD_LINK_PROB:
+            self.addConnectionMutation()
+        elif uniform(0, 1) < MUTATE_ADD_NODE_PROB:
+            self.addNodeMutation()
+        elif uniform(0, 1) < MUTATE_DELETE_LINK_PROB:
+            self.deleteConnectionMutation()
+        elif uniform(0, 1) < MUTATE_DELETE_NODE_PROB:
+            self.deleteNodeMutation()
+        elif uniform(0, 1) < MUTATE_TOGGLE_ENABLE_PROB:
+            self.toggleEnableMutation()
+        elif uniform(0, 1) < MUTTE_RENABLE_PROB:
+            self.renenableMutation()
+
+    def mutate_any(self):
+        if not self.connections:
+            self.addConnectionMutation()
+        if uniform(0, 1) < MUTATE_WEIGHTS_PROB:
+            self.weightsMutation()
+        if uniform(0, 1) < MUTATE_ADD_LINK_PROB:
+            self.addConnectionMutation()
+        if uniform(0, 1) < MUTATE_ADD_NODE_PROB:
+            self.addNodeMutation()
+        if uniform(0, 1) < MUTATE_DELETE_LINK_PROB:
+            self.deleteConnectionMutation()
+        if uniform(0, 1) < MUTATE_DELETE_NODE_PROB:
+            self.deleteNodeMutation()
+        if uniform(0, 1) < MUTATE_TOGGLE_ENABLE_PROB:
+            self.toggleEnableMutation()
+        if uniform(0, 1) < MUTTE_RENABLE_PROB:
+            self.renenableMutation()
 
     # Assunes genome1 is fitter than genome 2
     @classmethod
