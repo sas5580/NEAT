@@ -166,8 +166,7 @@ class Genome:
 
     def weightsMutation(self):
         for connection in self.connections.values():
-            if not connection.frozen:
-                connection.mutateWeight()
+            connection.mutateWeight()
 
     def _mutate_one(self):
         if not self.connections:

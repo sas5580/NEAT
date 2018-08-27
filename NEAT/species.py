@@ -3,8 +3,7 @@ from collections import namedtuple
 from random import uniform
 from math import sqrt
 
-from NEAT.config import COMPTABILITY_THRESHOLD, SPECIES_PENALIZE_AGE, STAGNANT_SPECIES_PENALTY, \
-    SURVIVAL_THRESHOLD, PERCENT_NO_CROSSOVER, MATE_ONLY_PROB
+from NEAT.config import COMPTABILITY_THRESHOLD, SURVIVAL_THRESHOLD, PERCENT_NO_CROSSOVER, MATE_ONLY_PROB
 from NEAT.genome import Genome
 from NEAT.organism import Organism
 
@@ -14,7 +13,7 @@ class Species:
         self.organisms = [rep_org]
         self.max_fitness = None
         self.max_fitness_lifetime = None
-        self.average_adjusted_fitness = None
+        self.average_adjusted_fitness = 0.0
         self.age = 0
         self.last_improved_age = 0
 

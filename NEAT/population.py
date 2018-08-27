@@ -19,11 +19,20 @@ class Population:
         self.species = []
         self.speciate(self.organisms)
         self.evaluator_func = evaluator_func
+        self.best_org = None
+        self.calculate_fitness()
 
     def calculate_fitness(self):
+        best_fitness = -1e9
+        best_org = None
         for org in self.organisms:
             network = Network(org.genome.nodes, org.genome.bias, org.genome.connections)
             org.fitness = self.evaluator_func(network)
+            if best_fitness > org.fitness:
+                best_org = org
+
+        if self.best_org is None or best_fitness > self.best_org.fitness:
+            self.best_org = best_org
 
     def speciate(self, organisms):
         for org in organisms:
@@ -41,8 +50,6 @@ class Population:
 
     def next_generation(self):
         self.generation += 1
-
-        self.calculate_fitness()
 
         # Adjust fitness based on species size and stagnance
         # Kill off bottom of species (param for amount)
@@ -88,3 +95,8 @@ class Population:
             sp.wipe_older_generations()
 
         self.organisms = children
+
+        self.calculate_fitness()
+
+    def get_best(self):
+        return max(self.organisms, key=attrgetter('fitnesss'))
