@@ -1,11 +1,12 @@
 from operator import attrgetter
 from collections import namedtuple
+from random import uniform
+from math import sqrt
 
+from NEAT.config import COMPTABILITY_THRESHOLD, SPECIES_PENALIZE_AGE, STAGNANT_SPECIES_PENALTY, \
+    SURVIVAL_THRESHOLD, PERCENT_NO_CROSSOVER, MATE_ONLY_PROB
 from NEAT.genome import Genome
-from NEAT.config import COMPTABILITY_THRESHOLD, SPECIES_PENALIZE_AGE, STAGNANT_SPECIES_PENALTY, SURVIVAL_THRESHOLD
-
-Organism = namedtuple('Organism', ['id', 'generation', 'genome', 'network', 'fitness', 'adjusted_fitness', 'eliminate', 'champion'])
-Organism.__new__.__defaults__ = (None, None, False, False)
+from NEAT.organism import Organism
 
 
 class Species:
@@ -59,3 +60,30 @@ class Species:
             del self.organisms[i]
 
         self.average_adjusted_fitness = new_av_fitness/len(self.organisms)
+
+    def reproduce(self, generation):
+        baby_genome = None
+        if uniform(0, 1) < PERCENT_NO_CROSSOVER:
+            baby_genome = self._select_org_for_reproduction().genome
+            baby_genome.mutate()
+        else:
+            parent1 = self._select_org_for_reproduction()
+            parent2 = self._select_org_for_reproduction()
+
+            if parent1.fitness > parent2.fitness:
+                baby_genome = Genome.crossover(parent1.genome, parent2.genome)
+            else:
+                baby_genome = Genome.crossover(parent2.genome, parent1.genome)
+
+            if parent1 is parent2 or uniform(0, 1) > MATE_ONLY_PROB:
+                baby_genome.mutate()
+
+        return Organism(generation, baby_genome)
+
+    def _select_org_for_reproduction(self):
+        orgs = len(self.organisms)
+        favoured_ind = int(orgs - sqrt(orgs**2 - uniform(0, orgs**2)))
+        return self.organisms[favoured_ind]
+
+    def wipe_older_generations(self, generation):
+        self.organisms = [org for org in self.organisms if org.generation < generation]

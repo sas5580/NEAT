@@ -1,4 +1,5 @@
 from random import sample, choice, uniform
+from copy import copy
 
 from NEAT.config import DISABLE_PROB_IF_PARENT_DISABLED, EXCESS_WEIGHT, DISJOINT_WEIGHT, WEIGHT_DIFFERENCE_WEIGHT, \
     ADD_CONNECTION_MUTATION_ATTEMPTS, ADD_NODE_MUTATION_ATTEMPTS, MUTATE_ADD_LINK_PROB, MUTATE_ADD_NODE_PROB, MUTATE_DELETE_LINK_PROB, \
@@ -168,10 +169,10 @@ class Genome:
             if not connection.frozen:
                 connection.mutateWeight()
 
-    def mutate_one(self):
+    def _mutate_one(self):
         if not self.connections:
             self.addConnectionMutation()
-        elif uniform(0, 1) < MUTATE_WEIGHTS_PROB:
+        if uniform(0, 1) < MUTATE_WEIGHTS_PROB:
             self.weightsMutation()
         elif uniform(0, 1) < MUTATE_ADD_LINK_PROB:
             self.addConnectionMutation()
@@ -186,7 +187,7 @@ class Genome:
         elif uniform(0, 1) < MUTTE_RENABLE_PROB:
             self.renenableMutation()
 
-    def mutate_any(self):
+    def _mutate_any(self):
         if not self.connections:
             self.addConnectionMutation()
         if uniform(0, 1) < MUTATE_WEIGHTS_PROB:
@@ -203,6 +204,17 @@ class Genome:
             self.toggleEnableMutation()
         if uniform(0, 1) < MUTTE_RENABLE_PROB:
             self.renenableMutation()
+
+    def mutate(self):
+        self._mutate_one()
+
+    def clone(self):
+        cl = Genome()
+        cl.nodes = copy(self.nodes)
+        for connection in self.connections:
+            cl._addConnection(connection.clone())
+
+        return cl
 
     # Assunes genome1 is fitter than genome 2
     @classmethod

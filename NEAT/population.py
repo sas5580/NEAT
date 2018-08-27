@@ -2,25 +2,28 @@ from operator import attrgetter
 
 from NEAT.config import STAGNANT_SPECIES_AGE_DIFF
 from NEAT.network import Network
-from NEAT.species import Organism, Species
+from NEAT.species import Species
+from NEAT.organism import Organism
 
 
 class Population:
-    def __init__(self, seed_genomes):
-        self.generation = 1
+    def __init__(self, seed_genomes, evaluator_func):
+        self.generation = 0
         self.max_fitness = 0
         self.organisms = []
-        for i, genome in enumerate(seed_genomes):
-            net = Network(genome.nodes, genome.bias, genome.connections)
+        for genome in seed_genomes:
             self.organisms.append(
-                Organism(i, 1, genome, net)
+                Organism(1, genome)
             )
 
         self.species = []
         self.speciate(self.organisms)
+        self.evaluator_func = evaluator_func
 
     def calculate_fitness(self):
-        pass
+        for org in self.organisms:
+            network = Network(org.genome.nodes, org.genome.bias, org.genome.connections)
+            org.fitness = self.evaluator_func(network)
 
     def speciate(self, organisms):
         for org in organisms:
@@ -37,6 +40,8 @@ class Population:
 
 
     def next_generation(self):
+        self.generation += 1
+
         self.calculate_fitness()
 
         # Adjust fitness based on species size and stagnance
@@ -50,7 +55,6 @@ class Population:
         # delete old organisms from population and species
         population_size = len(self.organisms)
         average_fitness_sum = 0.0
-
 
         for sp in self.species:
             sp.new_gen()
@@ -70,9 +74,17 @@ class Population:
                 average_fitness_sum -= sp.average_adjusted_fitness
                 del self.species[sp_index]
 
+        expected_orgs = len(self.organisms)
         children = []
         for sp in self.species:
+            children.append(Organism(self.generation, sp.organisms[0].genome))
 
-            num_children = 0
+            num_children = (sp.average_adjusted_fitness / average_fitness_sum * expected_orgs) - 1
+            for _ in range(num_children):
+                children.append(sp.reproduce(self.generation))
 
-        self.generation += 1
+        self.speciate(children)
+        for sp in self.species:
+            sp.wipe_older_generations()
+
+        self.organisms = children
