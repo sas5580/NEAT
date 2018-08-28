@@ -11,8 +11,8 @@ from NEAT.organism import Organism
 class Species:
     def __init__(self, rep_org):
         self.organisms = [rep_org]
-        self.max_fitness = None
-        self.max_fitness_lifetime = None
+        self.max_fitness = -1e9
+        self.max_fitness_lifetime = -1e9
         self.average_adjusted_fitness = 0.0
         self.age = 0
         self.last_improved_age = 0
@@ -29,7 +29,7 @@ class Species:
     def new_gen(self):
         self.age += 1
 
-    def compuate_adjusted_fitness(self):
+    def compute_adjusted_fitness(self):
         size = len(self.organisms)
 
         for org in self.organisms:
@@ -54,9 +54,9 @@ class Species:
         new_av_fitness = self.average_adjusted_fitness*len(self.organisms)
         num_parents = int(SURVIVAL_THRESHOLD*(len(self.organisms) + 1))
 
-        for i in range(num_parents, len(self.organisms)):
-            new_av_fitness -= self.organisms[i].adjusted_fitness
-            del self.organisms[i]
+        for _ in range(num_parents, len(self.organisms)):
+            new_av_fitness -= self.organisms[-1].adjusted_fitness
+            del self.organisms[-1]
 
         self.average_adjusted_fitness = new_av_fitness/len(self.organisms)
 
@@ -64,6 +64,7 @@ class Species:
         baby_genome = None
         if uniform(0, 1) < PERCENT_NO_CROSSOVER:
             baby_genome = self._select_org_for_reproduction().genome
+            baby_genome.verify()
             baby_genome.mutate()
         else:
             parent1 = self._select_org_for_reproduction()
@@ -73,10 +74,9 @@ class Species:
                 baby_genome = Genome.crossover(parent1.genome, parent2.genome)
             else:
                 baby_genome = Genome.crossover(parent2.genome, parent1.genome)
-
+            baby_genome.verify()
             if parent1 is parent2 or uniform(0, 1) > MATE_ONLY_PROB:
                 baby_genome.mutate()
-
         return Organism(generation, baby_genome)
 
     def _select_org_for_reproduction(self):
@@ -85,4 +85,4 @@ class Species:
         return self.organisms[favoured_ind]
 
     def wipe_older_generations(self, generation):
-        self.organisms = [org for org in self.organisms if org.generation < generation]
+        self.organisms = [org for org in self.organisms if org.generation == generation]

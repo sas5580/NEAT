@@ -18,18 +18,16 @@ class Genome:
         for _ in range(n_input):
             cls.INPUT_NODES.append(NodeGene(NodeGene.Type.INPUT, 0))
         for _ in range(n_ouput):
-            cls.INPUT_NODES.append(NodeGene(NodeGene.Type.OUTPUT, 1))
+            cls.OUTPUT_NODES.append(NodeGene(NodeGene.Type.OUTPUT, 1))
 
     def __init__(self):
-        self.nodes = set()
+        self.nodes = set(Genome.INPUT_NODES + Genome.OUTPUT_NODES)
         self.connections = dict()
         self.bias_node = Genome.BIAS_NODE
 
     def basic_init(self):
         for inode in Genome.INPUT_NODES:
-            self._addNode(inode)
             for onode in Genome.OUTPUT_NODES:
-                self._addNode(onode)
                 self._addConnection(ConnectionGene(inode, onode))
 
     def _addNode(self, node):
@@ -59,6 +57,7 @@ class Genome:
         return len(self.connections) == pos_connections
 
     def addConnectionMutation(self):
+        print('Attempting addConnectionMutation')
         if self._isFullyConnected():
             print('Genome fully connected')
             return
@@ -77,13 +76,14 @@ class Genome:
         self._addConnection(ConnectionGene(node1, node2))
 
     def deleteConnectionMutation(self):
+        print('Attempting deleteConnectionMutation')
         if not self.connections:
             return
 
         connection = choice(list(self.connections.values()))
         del self.connections[connection.innovation]
 
-        if connection.in_ != NodeGene.Type.HIDDEN and connection.out != NodeGene.Type.HIDDEN:
+        if connection.in_.type != NodeGene.Type.HIDDEN and connection.out.type != NodeGene.Type.HIDDEN:
             return
 
         found_in = found_out = False
@@ -93,13 +93,19 @@ class Genome:
             if connection.out == conn.in_ or connection.out == conn.out:
                 found_out = True
 
-        if connection.in_ == NodeGene.Type.HIDDEN and not found_in:
+        if connection.in_.type == NodeGene.Type.HIDDEN and not found_in:
             self.nodes.remove(connection.in_)
 
-        if connection.out == NodeGene.Type.HIDDEN and not found_out:
+        if connection.out.type == NodeGene.Type.HIDDEN and not found_out:
             self.nodes.remove(connection.out)
 
     def addNodeMutation(self):
+        print('Attempting addNodeMutation')
+        # SHouldnt need this since we always do add connection before mutating..
+        if not self.connections:
+            self.addConnectionMutation()
+            return
+
         attempt = 1
         connection = choice(list(self.connections.values()))
         while not connection.enabled and connection.in_ == self.bias_node:
@@ -123,7 +129,9 @@ class Genome:
         self._addConnection(ConnectionGene(connection.in_, new_node, 1.0))
         self._addConnection(ConnectionGene(new_node, connection.out, connection.weight))
 
+    # Broken
     def deleteNodeMutation(self):
+        print('Attempting deleteNodeMutation')
         first_non_io_node_ind = 0
         nodes = list(self.nodes)
         for node in nodes:
@@ -133,19 +141,24 @@ class Genome:
 
         if first_non_io_node_ind >= len(nodes) - 1:
             return
-
+        print(nodes)
         node = choice(nodes[first_non_io_node_ind:])
-        assert(node.type_ == NodeGene.Type.HIDDEN)
+        assert(node.type == NodeGene.Type.HIDDEN)
 
         self.nodes.remove(node)
 
         self.connections = {
-            innov: conn for innov, conn in self.connections.items() if
-            conn.in_ != node or conn.out != node
+            innov: conn for innov, conn in self.connections.items() if conn.in_ != node and conn.out != node
         }
 
     def toggleEnableMutation(self):
-        connection = choice(self.connections.values())
+        print('Attempting toggleEnableMutation')
+        # SHouldnt need this since we always do add connection before mutating..
+        if not self.connections:
+            self.addConnectionMutation()
+            return
+
+        connection = choice(list(self.connections.values()))
         if not connection.enabled:
             connection.enable()
         else:
@@ -159,12 +172,14 @@ class Genome:
                 connection.disable()
 
     def renenableMutation(self):
+        print('Attempting renenableMutation')
         for connection in self.connections.values():
             if not connection.enabled:
                 connection.enable()
                 break
 
     def weightsMutation(self):
+        print('Attempting weightsMutation')
         for connection in self.connections.values():
             connection.mutateWeight()
 
@@ -179,8 +194,6 @@ class Genome:
             self.addNodeMutation()
         elif uniform(0, 1) < MUTATE_DELETE_LINK_PROB:
             self.deleteConnectionMutation()
-        elif uniform(0, 1) < MUTATE_DELETE_NODE_PROB:
-            self.deleteNodeMutation()
         elif uniform(0, 1) < MUTATE_TOGGLE_ENABLE_PROB:
             self.toggleEnableMutation()
         elif uniform(0, 1) < MUTTE_RENABLE_PROB:
@@ -197,15 +210,16 @@ class Genome:
             self.addNodeMutation()
         if uniform(0, 1) < MUTATE_DELETE_LINK_PROB:
             self.deleteConnectionMutation()
-        if uniform(0, 1) < MUTATE_DELETE_NODE_PROB:
-            self.deleteNodeMutation()
         if uniform(0, 1) < MUTATE_TOGGLE_ENABLE_PROB:
             self.toggleEnableMutation()
         if uniform(0, 1) < MUTTE_RENABLE_PROB:
             self.renenableMutation()
 
     def mutate(self):
+        print('MUTATING')
         self._mutate_one()
+        print()
+        self.verify()
 
     def clone(self):
         cl = Genome()
@@ -219,6 +233,7 @@ class Genome:
     @classmethod
     def crossover(cls, genome1, genome2):
         child = cls()
+
         for innovation, connection in genome1.connections.items():
             disable_prob = 0.0
             weight = None
@@ -278,5 +293,11 @@ class Genome:
                 elif ino1 > ino2:
                     disjoint_count += 1
                     con_ind2 += 1
-
+        matching_count = matching_count or 1
         return DISJOINT_WEIGHT*disjoint_count + EXCESS_WEIGHT*excess_count + WEIGHT_DIFFERENCE_WEIGHT*weight_diff/matching_count
+
+    def verify(self):
+        for c in self.connections.values():
+            assert c.in_ in self.nodes or c.in_ == self.bias_node, f'{c.in_} not in nodes'
+            assert c.out in self.nodes or c.out == self.bias_node, f'{c.out} not in nodes'
+            assert c.in_.depth < c.out.depth, f'in {c.in_} has depth {c.in_.depth}, out {c.out} has depth {c.out.depth}'

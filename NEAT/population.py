@@ -13,7 +13,7 @@ class Population:
         self.organisms = []
         for genome in seed_genomes:
             self.organisms.append(
-                Organism(1, genome)
+                Organism(0, genome)
             )
 
         self.species = []
@@ -23,15 +23,14 @@ class Population:
         self.calculate_fitness()
 
     def calculate_fitness(self):
-        best_fitness = -1e9
         best_org = None
         for org in self.organisms:
-            network = Network(org.genome.nodes, org.genome.bias, org.genome.connections)
+            network = Network(org.genome.nodes, org.genome.bias_node, org.genome.connections)
             org.fitness = self.evaluator_func(network)
-            if best_fitness > org.fitness:
+            if not best_org or org.fitness > best_org.fitness:
                 best_org = org
-
-        if self.best_org is None or best_fitness > self.best_org.fitness:
+        print(f'Best fitness this geneartion: {best_org.fitness}')
+        if self.best_org is None or best_org.fitness > self.best_org.fitness:
             self.best_org = best_org
 
     def speciate(self, organisms):
@@ -50,19 +49,12 @@ class Population:
 
     def next_generation(self):
         self.generation += 1
+        print(f'Beginning Generation {self.generation}')
 
-        # Adjust fitness based on species size and stagnance
-        # Kill off bottom of species (param for amount)
-        # Calculate average fitnesses of each species
-        # Kill stagnant species
-        # Kill crappy species
-        # give children to species based on how much they contribute to the entire sum of average fitnesses
-        # If not enough children, create more from best species
-        # Speciate based on old organsisms
-        # delete old organisms from population and species
         population_size = len(self.organisms)
         average_fitness_sum = 0.0
 
+        print(f'Num Species: {len(self.species)}')
         for sp in self.species:
             sp.new_gen()
             sp.compute_adjusted_fitness()
@@ -81,18 +73,35 @@ class Population:
                 average_fitness_sum -= sp.average_adjusted_fitness
                 del self.species[sp_index]
 
+        print(f'Num Species after cull: {len(self.species)}')
+
         expected_orgs = len(self.organisms)
         children = []
+        best_species = None
         for sp in self.species:
+            if not best_species or sp.average_adjusted_fitness > best_species.average_adjusted_fitness:
+                best_species = sp
+
             children.append(Organism(self.generation, sp.organisms[0].genome))
 
             num_children = (sp.average_adjusted_fitness / average_fitness_sum * expected_orgs) - 1
-            for _ in range(num_children):
+            for _ in range(int(num_children)):
                 children.append(sp.reproduce(self.generation))
 
+        num_childs = len(children)
+        while num_childs < expected_orgs:
+            children.append(best_species.reproduce(self.generation))
+            num_childs += 1
+
         self.speciate(children)
-        for sp in self.species:
-            sp.wipe_older_generations()
+
+        sp_index = len(self.species)
+        ave_fit_sum_copy = average_fitness_sum
+        while sp_index > 0:
+            sp_index -= 1
+            self.species[sp_index].wipe_older_generations(self.generation)
+            if not self.species[sp_index].organisms:
+                del self.species[sp_index]
 
         self.organisms = children
 

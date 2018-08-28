@@ -19,7 +19,7 @@ class ConnectionGene:
         return cls.INNOVATION_COUNT
 
     def __init__(self, in_node, out_node, weight = None, disable_chance = 0.0):
-        assert(in_node.depth < out_node.depth)
+        assert in_node.depth < out_node.depth, f'in {in_node} has depth {in_node.depth}, out {out_node} has depth {out_node.depth}'
 
         self.innovation = self.getInnovation(in_node, out_node)
         if self.innovation is None:

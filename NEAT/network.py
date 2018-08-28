@@ -11,7 +11,6 @@ class Network:
         self.node_depths = [[bias]]
         self.graph = {bias: []}
         self.activations = {bias: 1.0}
-
         for node in nodes:
             while node.depth >= len(self.node_depths):
                 self.node_depths.append([])
@@ -29,8 +28,6 @@ class Network:
                 self.graph[connection.out].append((connection.in_, connection.weight))
 
     def activate(self, inputs):
-        assert(len(inputs) == len(self.node_depths[0]) - 1)
-
         for i, val in enumerate(inputs):
             self.activations[self.node_depths[0][i+1]] = val
 
@@ -38,7 +35,7 @@ class Network:
             for node in nodes:
                 activation = 0
                 for inode, weight in self.graph[node]:
-                    activation += self.activations[inode]*weight
+                    activation += (self.activations[inode] or 0)*weight
                 self.activations[node] = sigmoid(activation)
 
         for node in self.node_depths[-1]:

@@ -8,7 +8,7 @@ def run_neat(inp_nodes, out_nodes, evaluator_func):
     for _ in range(POPULATION_SIZE):
         genome = Genome()
         genome.basic_init()
-        seed_orgs.append(seed_orgs)
+        seed_orgs.append(genome)
 
     population = Population(seed_orgs, evaluator_func)
 
