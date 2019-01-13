@@ -6,6 +6,7 @@ from math import sqrt
 from NEAT.config import COMPTABILITY_THRESHOLD, SURVIVAL_THRESHOLD, PERCENT_NO_CROSSOVER, MATE_ONLY_PROB
 from NEAT.genome import Genome
 from NEAT.organism import Organism
+from NEAT.drawing import draw_genome
 
 
 class Species:
@@ -69,12 +70,20 @@ class Species:
         else:
             parent1 = self._select_org_for_reproduction()
             parent2 = self._select_org_for_reproduction()
-
+            parent1.genome.verify()
+            parent2.genome.verify()
             if parent1.fitness > parent2.fitness:
                 baby_genome = Genome.crossover(parent1.genome, parent2.genome)
             else:
                 baby_genome = Genome.crossover(parent2.genome, parent1.genome)
             baby_genome.verify()
+            if generation > 10:
+                draw_genome(parent1.genome, 'parent_1')
+                print(f'p1 fitness: {parent1.fitness}')
+                draw_genome(parent2.genome, 'parent_2')
+                print(f'p2 fitness: {parent2.fitness}')
+                draw_genome(baby_genome, 'child')
+                input()
             if parent1 is parent2 or uniform(0, 1) > MATE_ONLY_PROB:
                 baby_genome.mutate()
         return Organism(generation, baby_genome)
@@ -86,3 +95,6 @@ class Species:
 
     def wipe_older_generations(self, generation):
         self.organisms = [org for org in self.organisms if org.generation == generation]
+
+    def verify(self):
+        for org in self.organisms: org.genome.verify()

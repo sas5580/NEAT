@@ -6,6 +6,7 @@ from NEAT.config import DISABLE_PROB_IF_PARENT_DISABLED, EXCESS_WEIGHT, DISJOINT
     MUTATE_DELETE_NODE_PROB, MUTATE_TOGGLE_ENABLE_PROB, MUTATE_WEIGHTS_PROB, MUTTE_RENABLE_PROB
 from NEAT.node_gene import NodeGene
 from NEAT.connection_gene import ConnectionGene
+from NEAT.drawing import draw_genome, history
 
 class Genome:
     INPUT_NODES = []
@@ -20,10 +21,12 @@ class Genome:
         for _ in range(n_ouput):
             cls.OUTPUT_NODES.append(NodeGene(NodeGene.Type.OUTPUT, 1))
 
-    def __init__(self):
+    def __init__(self, parents = None):
         self.nodes = set(Genome.INPUT_NODES + Genome.OUTPUT_NODES)
         self.connections = dict()
         self.bias_node = Genome.BIAS_NODE
+
+        self.parents = parents
 
     def basic_init(self):
         for inode in Genome.INPUT_NODES:
@@ -57,7 +60,7 @@ class Genome:
         return len(self.connections) == pos_connections
 
     def addConnectionMutation(self):
-        print('Attempting addConnectionMutation')
+        #print('Attempting addConnectionMutation')
         if self._isFullyConnected():
             print('Genome fully connected')
             return
@@ -76,7 +79,7 @@ class Genome:
         self._addConnection(ConnectionGene(node1, node2))
 
     def deleteConnectionMutation(self):
-        print('Attempting deleteConnectionMutation')
+        #print('Attempting deleteConnectionMutation')
         if not self.connections:
             return
 
@@ -100,7 +103,7 @@ class Genome:
             self.nodes.remove(connection.out)
 
     def addNodeMutation(self):
-        print('Attempting addNodeMutation')
+        #print('Attempting addNodeMutation')
         # SHouldnt need this since we always do add connection before mutating..
         if not self.connections:
             self.addConnectionMutation()
@@ -131,7 +134,7 @@ class Genome:
 
     # Broken
     def deleteNodeMutation(self):
-        print('Attempting deleteNodeMutation')
+        #print('Attempting deleteNodeMutation')
         first_non_io_node_ind = 0
         nodes = list(self.nodes)
         for node in nodes:
@@ -152,7 +155,7 @@ class Genome:
         }
 
     def toggleEnableMutation(self):
-        print('Attempting toggleEnableMutation')
+        #print('Attempting toggleEnableMutation')
         # SHouldnt need this since we always do add connection before mutating..
         if not self.connections:
             self.addConnectionMutation()
@@ -172,14 +175,14 @@ class Genome:
                 connection.disable()
 
     def renenableMutation(self):
-        print('Attempting renenableMutation')
+        #print('Attempting renenableMutation')
         for connection in self.connections.values():
             if not connection.enabled:
                 connection.enable()
                 break
 
     def weightsMutation(self):
-        print('Attempting weightsMutation')
+        #print('Attempting weightsMutation')
         for connection in self.connections.values():
             connection.mutateWeight()
 
@@ -216,23 +219,24 @@ class Genome:
             self.renenableMutation()
 
     def mutate(self):
-        print('MUTATING')
+        #print('MUTATING')
         self._mutate_one()
-        print()
+        #print()
         self.verify()
 
     def clone(self):
-        cl = Genome()
+        cl = Genome([self])
         cl.nodes = copy(self.nodes)
         for connection in self.connections:
             cl._addConnection(connection.clone())
 
         return cl
 
-    # Assunes genome1 is fitter than genome 2
+    # Assunes genome1 is fitter than genome2
     @classmethod
     def crossover(cls, genome1, genome2):
-        child = cls()
+        child = cls([genome1, genome2])
+        child.nodes = copy(genome1.nodes)
 
         for innovation, connection in genome1.connections.items():
             disable_prob = 0.0
@@ -241,7 +245,7 @@ class Genome:
                 if not connection.enabled or not genome2.connections[innovation].enabled:
                     disable_prob = DISABLE_PROB_IF_PARENT_DISABLED
 
-                # TODO: Parameterizing this prob might improve performance
+                # TODO: Parameterizing this might improve performance
                 if uniform(0, 1) < 0.5:
                     weight = connection.weight
                 else:
@@ -250,18 +254,10 @@ class Genome:
                 disable_prob = 0.0 if connection.enabled else 1.0
                 weight = connection.weight
 
-            try:
-                child._addNode(connection.in_)
-            except:
-                pass
-            try:
-                child._addNode(connection.out)
-            except:
-                pass
-
             child._addConnection(ConnectionGene(
                 connection.in_, connection.out, weight, disable_prob
             ))
+
         return child
 
     @staticmethod
@@ -269,7 +265,6 @@ class Genome:
         con_ind1 = con_ind2 = 0
         cons1, cons2 = list(genome1.connections.keys()), list(genome2.connections.keys())
         n1, n2 = len(genome1.connections), len(genome2.connections)
-
 
         disjoint_count = excess_count = matching_count = weight_diff = 0
 
@@ -297,7 +292,12 @@ class Genome:
         return DISJOINT_WEIGHT*disjoint_count + EXCESS_WEIGHT*excess_count + WEIGHT_DIFFERENCE_WEIGHT*weight_diff/matching_count
 
     def verify(self):
-        for c in self.connections.values():
-            assert c.in_ in self.nodes or c.in_ == self.bias_node, f'{c.in_} not in nodes'
-            assert c.out in self.nodes or c.out == self.bias_node, f'{c.out} not in nodes'
-            assert c.in_.depth < c.out.depth, f'in {c.in_} has depth {c.in_.depth}, out {c.out} has depth {c.out.depth}'
+        try:
+            for c in self.connections.values():
+                assert c.in_ in self.nodes or c.in_ == self.bias_node, f'{c.in_} not in nodes'
+                assert c.out in self.nodes or c.out == self.bias_node, f'{c.out} not in nodes'
+                assert c.in_.depth < c.out.depth, f'in {c.in_} has depth {c.in_.depth}, out {c.out} has depth {c.out.depth}'
+        except AssertionError:
+            #draw_genome(self, 'invalid')
+            history(self)
+            raise

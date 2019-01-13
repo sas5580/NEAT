@@ -83,8 +83,8 @@ class Population:
                 best_species = sp
 
             children.append(Organism(self.generation, sp.organisms[0].genome))
-
             num_children = (sp.average_adjusted_fitness / average_fitness_sum * expected_orgs) - 1
+
             for _ in range(int(num_children)):
                 children.append(sp.reproduce(self.generation))
 
@@ -109,3 +109,6 @@ class Population:
 
     def get_best(self):
         return max(self.organisms, key=attrgetter('fitnesss'))
+
+    def verify(self):
+        for org in self.organisms: org.verify()
