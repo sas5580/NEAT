@@ -17,11 +17,14 @@ class NodeGene:
         return node1, node2
 
     ID_COUNT = 0
+    NODE_MAP = {}
     def __init__(self, type_, depth):
         NodeGene.ID_COUNT += 1
         self.id = NodeGene.ID_COUNT
         self.type = type_
         self.depth = depth
+
+        NodeGene.NODE_MAP[self.id] = self
 
     def __hash__(self):
         return self.id
@@ -33,4 +36,4 @@ class NodeGene:
         return str(self.id)
 
     def __str__(self):
-        return f'Node {self.id}'
+        return f'Node {self.id} ({self.depth})'

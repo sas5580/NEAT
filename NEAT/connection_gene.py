@@ -1,4 +1,4 @@
-from random import uniform, gauss
+from NEAT.neat import random
 
 from NEAT.config import WEIGHT_MUTATION_POWER, WEIGHT_CAP, PERTRUBE_WEIGHT_PROB, RANDOM_WEIGHT_PROB
 
@@ -27,8 +27,8 @@ class ConnectionGene:
 
         self.in_ = in_node
         self.out = out_node
-        self.weight = uniform(-1, 1) if weight is None else weight
-        self.enabled = uniform(0, 1) >= disable_chance
+        self.weight = random.uniform(-1, 1) if weight is None else weight
+        self.enabled = random.uniform(0, 1) >= disable_chance
 
     def disable(self):
         self.enabled = False
@@ -40,11 +40,11 @@ class ConnectionGene:
         return ConnectionGene(self.in_, self.out, self.weight, 0 if self.enabled else 1)
 
     def mutateWeight(self):
-        rand = uniform(0, 1)
+        rand = random.uniform(0, 1)
         if rand < RANDOM_WEIGHT_PROB:
-            self.weight = uniform(-1, 1)
+            self.weight = random.uniform(-1, 1)
         elif rand < PERTRUBE_WEIGHT_PROB:
-            self.weight += gauss(0, 1)*WEIGHT_MUTATION_POWER
+            self.weight += random.gauss(0, 1)*WEIGHT_MUTATION_POWER
             self.weight = max(min(self.weight, WEIGHT_CAP), -WEIGHT_CAP)
 
     def __repr__(self):

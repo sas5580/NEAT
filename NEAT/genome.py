@@ -1,17 +1,19 @@
-from random import sample, choice, uniform
 from copy import copy
 
+from NEAT.neat import random
 from NEAT.config import DISABLE_PROB_IF_PARENT_DISABLED, EXCESS_WEIGHT, DISJOINT_WEIGHT, WEIGHT_DIFFERENCE_WEIGHT, \
     ADD_CONNECTION_MUTATION_ATTEMPTS, ADD_NODE_MUTATION_ATTEMPTS, MUTATE_ADD_LINK_PROB, MUTATE_ADD_NODE_PROB, MUTATE_DELETE_LINK_PROB, \
-    MUTATE_DELETE_NODE_PROB, MUTATE_TOGGLE_ENABLE_PROB, MUTATE_WEIGHTS_PROB, MUTTE_RENABLE_PROB
+    MUTATE_DELETE_NODE_PROB, MUTATE_TOGGLE_ENABLE_PROB, MUTATE_WEIGHTS_PROB, MUTATE_RENABLE_PROB
 from NEAT.node_gene import NodeGene
 from NEAT.connection_gene import ConnectionGene
 from NEAT.drawing import draw_genome, history
+
 
 class Genome:
     INPUT_NODES = []
     OUTPUT_NODES = []
     BIAS_NODE = None
+    ID = 0
 
     @classmethod
     def init_io_nodes(cls, n_input, n_ouput):
@@ -21,7 +23,9 @@ class Genome:
         for _ in range(n_ouput):
             cls.OUTPUT_NODES.append(NodeGene(NodeGene.Type.OUTPUT, 1))
 
-    def __init__(self, parents = None):
+    def __init__(self, parents=None):
+        self.id = Genome.ID
+        Genome.ID += 1
         self.nodes = set(Genome.INPUT_NODES + Genome.OUTPUT_NODES)
         self.connections = dict()
         self.bias_node = Genome.BIAS_NODE
@@ -62,19 +66,19 @@ class Genome:
     def addConnectionMutation(self):
         #print('Attempting addConnectionMutation')
         if self._isFullyConnected():
-            print('Genome fully connected')
+            #print('Genome fully connected')
             return
 
         # Find 2 nodes that can have a valid connection and aren't already connected
         attempts = 1
         node_set = self.nodes.union({self.bias_node})
-        node1, node2 = NodeGene.orientNodes(sample(node_set, 1)[0], sample(node_set, 1)[0])
+        node1, node2 = NodeGene.orientNodes(random.sample(node_set, 1)[0], random.sample(node_set, 1)[0])
         while node1.type == node2.type or node1.depth == node2.depth or ConnectionGene.getInnovation(node1, node2) in self.connections:
             attempts += 1
             if attempts > ADD_CONNECTION_MUTATION_ATTEMPTS:
-                print('addConncetionMutation too many attempts')
+                #print('addConncetionMutation too many attempts')
                 return
-            node1, node2 = NodeGene.orientNodes(sample(node_set, 1)[0], sample(node_set, 1)[0])
+            node1, node2 = NodeGene.orientNodes(random.sample(node_set, 1)[0], random.sample(node_set, 1)[0])
 
         self._addConnection(ConnectionGene(node1, node2))
 
@@ -83,7 +87,7 @@ class Genome:
         if not self.connections:
             return
 
-        connection = choice(list(self.connections.values()))
+        connection = random.choice(list(self.connections.values()))
         del self.connections[connection.innovation]
 
         if connection.in_.type != NodeGene.Type.HIDDEN and connection.out.type != NodeGene.Type.HIDDEN:
@@ -105,24 +109,22 @@ class Genome:
     def addNodeMutation(self):
         #print('Attempting addNodeMutation')
         # SHouldnt need this since we always do add connection before mutating..
-        if not self.connections:
-            self.addConnectionMutation()
-            return
+        assert self.connections, 'no connections before add node mutation'
 
         attempt = 1
-        connection = choice(list(self.connections.values()))
+        connection = random.choice(list(self.connections.values()))
         while not connection.enabled and connection.in_ == self.bias_node:
             attempt += 1
             if attempt > ADD_NODE_MUTATION_ATTEMPTS:
-                print('addNodeMutation too many attempts')
+                #print('addNodeMutation too many attempts')
                 return
-            connection = choice(list(self.connections.values()))
+            connection = random.choice(list(self.connections.values()))
 
         connection.disable()
 
         if connection.in_.depth + 1 == connection.out.depth:
             # Adding new depth, increment larger depths to make space
-            for node in self.nodes:
+            for node in NodeGene.NODE_MAP.values():
                 if node.depth >= connection.out.depth:
                     node.depth += 1
 
@@ -132,7 +134,7 @@ class Genome:
         self._addConnection(ConnectionGene(connection.in_, new_node, 1.0))
         self._addConnection(ConnectionGene(new_node, connection.out, connection.weight))
 
-    # Broken
+    # FIXME: Broken
     def deleteNodeMutation(self):
         #print('Attempting deleteNodeMutation')
         first_non_io_node_ind = 0
@@ -144,8 +146,8 @@ class Genome:
 
         if first_non_io_node_ind >= len(nodes) - 1:
             return
-        print(nodes)
-        node = choice(nodes[first_non_io_node_ind:])
+
+        node = random.choice(nodes[first_non_io_node_ind:])
         assert(node.type == NodeGene.Type.HIDDEN)
 
         self.nodes.remove(node)
@@ -161,7 +163,7 @@ class Genome:
             self.addConnectionMutation()
             return
 
-        connection = choice(list(self.connections.values()))
+        connection = random.choice(list(self.connections.values()))
         if not connection.enabled:
             connection.enable()
         else:
@@ -189,45 +191,44 @@ class Genome:
     def _mutate_one(self):
         if not self.connections:
             self.addConnectionMutation()
-        if uniform(0, 1) < MUTATE_WEIGHTS_PROB:
+        if random.uniform(0, 1) < MUTATE_WEIGHTS_PROB:
             self.weightsMutation()
-        elif uniform(0, 1) < MUTATE_ADD_LINK_PROB:
+        elif random.uniform(0, 1) < MUTATE_ADD_LINK_PROB:
             self.addConnectionMutation()
-        elif uniform(0, 1) < MUTATE_ADD_NODE_PROB:
+        elif random.uniform(0, 1) < MUTATE_ADD_NODE_PROB:
             self.addNodeMutation()
-        elif uniform(0, 1) < MUTATE_DELETE_LINK_PROB:
+        elif random.uniform(0, 1) < MUTATE_DELETE_LINK_PROB:
             self.deleteConnectionMutation()
-        elif uniform(0, 1) < MUTATE_TOGGLE_ENABLE_PROB:
+        elif random.uniform(0, 1) < MUTATE_TOGGLE_ENABLE_PROB:
             self.toggleEnableMutation()
-        elif uniform(0, 1) < MUTTE_RENABLE_PROB:
+        elif random.uniform(0, 1) < MUTATE_RENABLE_PROB:
             self.renenableMutation()
 
     def _mutate_any(self):
         if not self.connections:
             self.addConnectionMutation()
-        if uniform(0, 1) < MUTATE_WEIGHTS_PROB:
+        if random.uniform(0, 1) < MUTATE_WEIGHTS_PROB:
             self.weightsMutation()
-        if uniform(0, 1) < MUTATE_ADD_LINK_PROB:
+        if random.uniform(0, 1) < MUTATE_ADD_LINK_PROB:
             self.addConnectionMutation()
-        if uniform(0, 1) < MUTATE_ADD_NODE_PROB:
+        if random.uniform(0, 1) < MUTATE_ADD_NODE_PROB:
             self.addNodeMutation()
-        if uniform(0, 1) < MUTATE_DELETE_LINK_PROB:
+        if random.uniform(0, 1) < MUTATE_DELETE_LINK_PROB:
             self.deleteConnectionMutation()
-        if uniform(0, 1) < MUTATE_TOGGLE_ENABLE_PROB:
+        if random.uniform(0, 1) < MUTATE_TOGGLE_ENABLE_PROB:
             self.toggleEnableMutation()
-        if uniform(0, 1) < MUTTE_RENABLE_PROB:
+        if random.uniform(0, 1) < MUTATE_RENABLE_PROB:
             self.renenableMutation()
 
     def mutate(self):
         #print('MUTATING')
         self._mutate_one()
-        #print()
         self.verify()
 
     def clone(self):
         cl = Genome([self])
         cl.nodes = copy(self.nodes)
-        for connection in self.connections:
+        for connection in self.connections.values():
             cl._addConnection(connection.clone())
 
         return cl
@@ -246,7 +247,7 @@ class Genome:
                     disable_prob = DISABLE_PROB_IF_PARENT_DISABLED
 
                 # TODO: Parameterizing this might improve performance
-                if uniform(0, 1) < 0.5:
+                if random.uniform(0, 1) < 0.5:
                     weight = connection.weight
                 else:
                     weight = genome2.connections[innovation].weight
@@ -297,7 +298,7 @@ class Genome:
                 assert c.in_ in self.nodes or c.in_ == self.bias_node, f'{c.in_} not in nodes'
                 assert c.out in self.nodes or c.out == self.bias_node, f'{c.out} not in nodes'
                 assert c.in_.depth < c.out.depth, f'in {c.in_} has depth {c.in_.depth}, out {c.out} has depth {c.out.depth}'
-        except AssertionError:
-            #draw_genome(self, 'invalid')
+        except AssertionError as e:
+            print(e)
             history(self)
             raise

@@ -1,8 +1,8 @@
 from operator import attrgetter
 from collections import namedtuple
-from random import uniform
 from math import sqrt
 
+from NEAT.neat import random
 from NEAT.config import COMPTABILITY_THRESHOLD, SURVIVAL_THRESHOLD, PERCENT_NO_CROSSOVER, MATE_ONLY_PROB
 from NEAT.genome import Genome
 from NEAT.organism import Organism
@@ -63,34 +63,32 @@ class Species:
 
     def reproduce(self, generation):
         baby_genome = None
-        if uniform(0, 1) < PERCENT_NO_CROSSOVER:
-            baby_genome = self._select_org_for_reproduction().genome
+        if random.uniform(0, 1) < PERCENT_NO_CROSSOVER:
+            parent = self._select_org_for_reproduction()
+            baby_genome = parent.genome.clone()
             baby_genome.verify()
             baby_genome.mutate()
         else:
             parent1 = self._select_org_for_reproduction()
             parent2 = self._select_org_for_reproduction()
+
             parent1.genome.verify()
             parent2.genome.verify()
+
             if parent1.fitness > parent2.fitness:
                 baby_genome = Genome.crossover(parent1.genome, parent2.genome)
             else:
                 baby_genome = Genome.crossover(parent2.genome, parent1.genome)
+
             baby_genome.verify()
-            if generation > 10:
-                draw_genome(parent1.genome, 'parent_1')
-                print(f'p1 fitness: {parent1.fitness}')
-                draw_genome(parent2.genome, 'parent_2')
-                print(f'p2 fitness: {parent2.fitness}')
-                draw_genome(baby_genome, 'child')
-                input()
-            if parent1 is parent2 or uniform(0, 1) > MATE_ONLY_PROB:
+            if parent1 is parent2 or random.uniform(0, 1) > MATE_ONLY_PROB:
                 baby_genome.mutate()
+
         return Organism(generation, baby_genome)
 
     def _select_org_for_reproduction(self):
         orgs = len(self.organisms)
-        favoured_ind = int(orgs - sqrt(orgs**2 - uniform(0, orgs**2)))
+        favoured_ind = int(orgs - sqrt(orgs**2 - random.uniform(0, orgs**2)))
         return self.organisms[favoured_ind]
 
     def wipe_older_generations(self, generation):

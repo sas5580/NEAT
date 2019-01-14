@@ -37,15 +37,17 @@ def draw_genome(genome, name):
     for connection in genome.connections.values():
         n1, n2 = node_locs[connection.in_], node_locs[connection.out]
         plt.plot((n1[0], n2[0]), (n1[1], n2[1]), 'k-', lw=2, color='green' if connection.enabled else 'red')
-        #mid_point = ((n1[0] + n2[0])/2, (n1[1] + n2[1])/2)
-        #plt.text(mid_point[0] - 2, mid_point[1], str(round(connection.weight, 2)))
+        mid_point = ((n1[0] + n2[0])/2, (n1[1] + n2[1])/2)
+        plt.text(mid_point[0] - 2, mid_point[1], str(round(connection.weight, 2)))
+
     plt.savefig(f'pics/{name}.png')
 
 def history(genome):
-    draw_genome(genome, f'genome')
+    draw_genome(genome, f'{genome.id}')
+    print(genome.nodes)
     if genome.parents:
         for i in range(len(genome.parents)):
-            draw_genome(genome.parents[i], f'parent{i}')
+            draw_genome(genome.parents[i], f'parent {i} of {genome.id} ({genome.parents[i].id})')
         input()
         for parent in genome.parents:
             history(parent)
