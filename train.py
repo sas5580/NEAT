@@ -46,8 +46,7 @@ def play_tetris(network):
     return fitness
 
 def tetris_fitness(network):
-    p = threading.Pool()
-    scores = p.map(play_tetris, [network] * NUM_GAMES_PER_GENOME)
+    scores = map(play_tetris, [network] * NUM_GAMES_PER_GENOME)
     return sum(scores) / NUM_GAMES_PER_GENOME
 
 def play_tetris_with_view(network):
