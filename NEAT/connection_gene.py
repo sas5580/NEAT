@@ -1,4 +1,4 @@
-from NEAT.neat import random
+from NEAT.random import random
 
 from NEAT.config import WEIGHT_MUTATION_POWER, WEIGHT_CAP, PERTRUBE_WEIGHT_PROB, RANDOM_WEIGHT_PROB
 

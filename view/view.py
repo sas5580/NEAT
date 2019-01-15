@@ -6,18 +6,21 @@ from config.game import WINDOW_HEIGHT, WINDOW_WIDTH
 from view.tetris_view import TetrisView
 
 class GameView:
-    def __init__(self):
+    def __init__(self, game=None, ai_controller=None, ai_state=None):
         self._running = True
         self.size = WINDOW_WIDTH, WINDOW_HEIGHT
         self._display = None
         self.tetris_view = None
-    
+        self.game = game
+        self.ai_controller = ai_controller
+        self.ai_state = ai_state
+
     def on_init(self):
         pg.init()
         self._display = pg.display.set_mode(self.size, pg.HWSURFACE | pg.DOUBLEBUF)
-        self.tetris_view = TetrisView()
+        self.tetris_view = TetrisView(self.game)
         self.tetris_view.init()
-    
+
     def on_event(self, event):
         if event.type == pg.QUIT:
             self._running = False
@@ -41,12 +44,12 @@ class GameView:
             self._running = False
 
         while self._running:
-            for event in pg.event.get():
-                self.on_event(event)
+            if self.ai_controller is None:
+                for event in pg.event.get():
+                    self.on_event(event)
+            else:
+                self.ai_controller(self.ai_state)
+
             self.on_loop()
             self.on_render()
         self.on_cleanup()
-
-        
-
-        

@@ -1,3 +1,4 @@
+import multiprocessing as mp
 from operator import attrgetter
 
 from NEAT.config import STAGNANT_SPECIES_AGE_DIFF
@@ -23,10 +24,13 @@ class Population:
         self.calculate_fitness()
 
     def calculate_fitness(self):
+        pool = mp.Pool(mp.cpu_count())
+
+        nets = (Network(org.genome.nodes, org.genome.bias_node, org.genome.connections) for org in self.organisms)
+
         best_org = None
-        for org in self.organisms:
-            network = Network(org.genome.nodes, org.genome.bias_node, org.genome.connections)
-            org.fitness = self.evaluator_func(network)
+        for org, fitness in zip(self.organisms, pool.map(self.evaluator_func, nets)):
+            org.fitness = fitness
             if not best_org or org.fitness > best_org.fitness:
                 best_org = org
         print(f'Best fitness this geneartion: {best_org.fitness}')

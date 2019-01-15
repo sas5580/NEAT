@@ -6,20 +6,18 @@ VERTICAL_BLOCKS = 20
 DROP_SPEED = 1 # second
 SPAWN_POS = (3, 0)
 
-MULTIPLIER = 1
-
-GRAVITY = 1000/MULTIPLIER # milliseconds between each move down
-DEFAULT_DELAY = 500/MULTIPLIER
-MAX_DELAY = 2200/MULTIPLIER # milliseconds
-DELAY_LEEWAY = 300/MULTIPLIER # milliseconds
-STEP_RATE = 20 # per second
+GRAVITY = 1000 # milliseconds between each move down
+DEFAULT_DELAY = 500
+MAX_DELAY = 2200 # milliseconds
+DELAY_LEEWAY = 300 # milliseconds
+STEP_RATE = 24 # per second
 
 
 # Display
 BLOCK_SIZE = 30 # px
 LINES_SENT_SIZE = (50, 50)
 NEXT_BOX_SIZE = (100, 300)
-BORDER_DEPTH = 20 
+BORDER_DEPTH = 20
 
 PIECE_COLORS = {
     PieceType.I: (80, 248, 253),

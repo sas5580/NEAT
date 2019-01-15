@@ -8,18 +8,18 @@ from game.actions import Action
 
 
 class TetrisView:
-    def __init__(self):
+    def __init__(self, game=None):
         pg.init()
 
-        self.game = Tetris()
+        self.game = game or Tetris()
 
         width = BLOCK_SIZE*HORIZONTAL_BLOCKS + 2*BORDER_DEPTH + LINES_SENT_SIZE[0] + NEXT_BOX_SIZE[0]
         height = BLOCK_SIZE*VERTICAL_BLOCKS + 2*BORDER_DEPTH + LINES_SENT_SIZE[1] + NEXT_BOX_SIZE[1]
         self.size = (width, height)
         self.surface = pg.Surface(self.size)
-    
+
     def draw_board(self):
-        
+
         board_surf = pg.Surface((BLOCK_SIZE*HORIZONTAL_BLOCKS, BLOCK_SIZE*VERTICAL_BLOCKS))
 
         for y, row in enumerate(self.game.get_board()):
@@ -38,7 +38,7 @@ class TetrisView:
     def draw(self):
         self.draw_board()
         return self.surface
-    
+
     def on_event(self, ev):
         action = None
         if ev.type == pg.KEYDOWN:

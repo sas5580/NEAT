@@ -1,4 +1,4 @@
-from random import shuffle
+import random
 from collections import deque
 from copy import deepcopy
 from time import time
@@ -11,7 +11,13 @@ from game.actions import Action
 
 
 class Tetris:
-    def __init__(self):
+    def __init__(self, speed_multiplier=1.0):
+        self.GRAVITY = GRAVITY / speed_multiplier
+        self.DEFAULT_DELAY = DEFAULT_DELAY / speed_multiplier
+        self.MAX_DELAY = MAX_DELAY / speed_multiplier
+        self.DELAY_LEEWAY = DELAY_LEEWAY / speed_multiplier
+        self.STEP_RATE = STEP_RATE * speed_multiplier
+
         self.clock = Clock()
         self.board = [[None for _ in range(HORIZONTAL_BLOCKS)] for _ in  range(VERTICAL_BLOCKS)]
         self.piece_queue = deque()
@@ -22,30 +28,35 @@ class Tetris:
         self.game_over = False
 
         self.last_step = 0 # time passed since alst grav
-        self.done_delay = DEFAULT_DELAY # amount to delay before next piece
+        self.done_delay = self.DEFAULT_DELAY # amount to delay before next piece
         self.last_ev = 0 # last time piece was moved
-    
+
+        self.score = 0
+        self.steps = 0
+        self.pieces_spawned = 0
+
     def check_queue(self):
         if len(self.piece_queue) <= PieceType.NUM_TYPES.value:
             types = list(PieceType)[:-2]
-            shuffle(types)
+            random.shuffle(types)
             self.piece_queue.extend(types)
-    
+
     def spawn_piece(self):
         piece_type = self.piece_queue.popleft()
         self.cur_piece = Piece(piece_type, SPAWN_POS)
 
+        self.pieces_spawned += 1
+
         if not self.cur_piece.check_rotation_pos_fits(self.board):
             self.game_over = True
             self.cur_piece = None
-            print('GAME OVER')
 
     def lower_piece(self):
         try:
             self.cur_piece.translate(self.board, 0, 1)
         except:
             pass
-    
+
     def swap_help_cur_piece(self):
         if not self.swapped:
             if not self.held_piece:
@@ -68,17 +79,17 @@ class Tetris:
             return True
         except:
             return False
-    
+
     def move_piece_right(self):
         try:
             self.cur_piece.translate(self.board, 1, 0)
             return True
         except:
             return False
-    
+
     def rotate_piece_clockwise(self):
         return self.cur_piece.rotate(self.board, RotationType.CLOCKWISE)
-    
+
     def rotate_piece_counterclockwise(self):
         return self.cur_piece.rotate(self.board, RotationType.COUNTER_CLOCKWISE)
 
@@ -91,12 +102,12 @@ class Tetris:
         self.check_queue()
         self.spawn_piece()
         self.swapped = False
-    
+
     def hard_drop(self):
         while not self.check_piece_done():
             self.lower_piece()
         self.settle_piece()
-    
+
     def clear_lines(self):
         rows_to_clear = []
         for row_ind in reversed(range(VERTICAL_BLOCKS)):
@@ -106,7 +117,7 @@ class Tetris:
             if cleared:
                 self.board[row_ind] = [None for _ in range(HORIZONTAL_BLOCKS)]
                 rows_to_clear.append(row_ind)
-        
+
         if not rows_to_clear:
             return
 
@@ -118,7 +129,9 @@ class Tetris:
             for shift_row in range(last_row - 1, row_ind, -1):
                 self.board[shift_row + shift_amt] = deepcopy(self.board[shift_row])
             last_row = row_ind
-    
+
+        self.score += len(rows_to_clear)
+
     def start(self):
         self.check_queue()
         self.spawn_piece()
@@ -140,7 +153,7 @@ class Tetris:
             action = self.rotate_piece_clockwise()
         elif action == Action.SWAP_HELD:
             self.swap_help_cur_piece()
-        
+
         if action_complete:
             self.last_ev = time()*1000
 
@@ -149,19 +162,19 @@ class Tetris:
             return False
 
         if self.piece_done:
-            if self.last_ev < DELAY_LEEWAY:
+            if self.last_ev < self.DELAY_LEEWAY:
                 self.done_delay += DELAY_LEEWAY
-                if self.done_delay < MAX_DELAY:
+                if self.done_delay < self.MAX_DELAY:
                     return False
             if not self.check_piece_done():
                 self.piece_done = False
 
-        elif self.last_step < GRAVITY:
+        elif self.last_step < self.GRAVITY:
             self.done_delay = 0
             self.last_step += self.clock.get_time()
             return False
-        
-        self.done_delay = DEFAULT_DELAY
+
+        self.done_delay = self.DEFAULT_DELAY
         self.last_step = 0
 
         return True
@@ -178,7 +191,8 @@ class Tetris:
             else:
                 self.lower_piece()
 
-        self.clock.tick(STEP_RATE)
+        self.steps += 1
+        self.clock.tick(self.STEP_RATE)
 
     def get_projection(self):
         if not self.cur_piece: return
@@ -204,4 +218,4 @@ class Tetris:
                     s += block.name
             s += '\n'
         return s
-    
+

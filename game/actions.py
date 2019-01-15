@@ -7,3 +7,4 @@ class Action(Enum):
     ROTATE = 3
     HARD_DROP = 4
     SWAP_HELD = 5
+    NOTHING = 6

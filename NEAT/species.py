@@ -2,7 +2,7 @@ from operator import attrgetter
 from collections import namedtuple
 from math import sqrt
 
-from NEAT.neat import random
+from NEAT.random import random
 from NEAT.config import COMPTABILITY_THRESHOLD, SURVIVAL_THRESHOLD, PERCENT_NO_CROSSOVER, MATE_ONLY_PROB
 from NEAT.genome import Genome
 from NEAT.organism import Organism
