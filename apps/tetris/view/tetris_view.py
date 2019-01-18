@@ -8,6 +8,10 @@ from apps.tetris.game.actions import Action
 
 
 class TetrisView:
+    @staticmethod
+    def window_size():
+        return (WINDOW_WIDTH, WINDOW_HEIGHT)
+
     def __init__(self, game=None):
         pg.init()
 

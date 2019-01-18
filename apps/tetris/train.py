@@ -6,7 +6,8 @@ import multiprocessing.dummy as threading
 from apps.tetris.config import HORIZONTAL_BLOCKS, VERTICAL_BLOCKS, STEP_RATE, NUM_GAMES_PER_GENOME, SPEED_MULTIPLIER_TRAINING
 from apps.tetris.game.actions import Action
 from apps.tetris.game.tetris import Tetris
-from apps.tetris.view.view import GameView
+from apps.tetris.view.tetris_view import TetrisView
+from apps.view_lib.view import GameView
 from NEAT.network import Network
 from NEAT.neat import run_neat
 
@@ -66,10 +67,10 @@ def play_tetris_with_view(network):
 
         state['force_drop_count'] += 1
 
-    view = GameView(game=game, ai_controller=make_move, ai_state={'force_drop_count': 0})
+    view = GameView(controller=TetrisView(game), ai_controller=make_move, ai_state={'force_drop_count': 0})
     view.run()
 
-org = run_neat(HORIZONTAL_BLOCKS*VERTICAL_BLOCKS, len(ACTION_MAP), tetris_fitness, population=10, generations=10)
+org = run_neat(HORIZONTAL_BLOCKS*VERTICAL_BLOCKS, len(ACTION_MAP), tetris_fitness, population=10, generations=2)
 
 with open(f'apps/tetris/genomes/{datetime.date.today()}_{org.fitness:.2f}.pickle', 'wb') as f:
     pickle.dump(org, f)
