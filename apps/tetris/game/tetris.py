@@ -142,20 +142,20 @@ class Tetris:
         action_complete = False
 
         if action == Action.MOVE_LEFT:
-            action = self.move_piece_left()
+            action_complete = self.move_piece_left()
         elif action == Action.MOVE_RIGHT:
-            action = self.move_piece_right()
+            action_complete = self.move_piece_right()
         elif action == Action.HARD_DROP:
             self.hard_drop()
         elif action == Action.MOVE_DOWN:
             self.lower_piece()
         elif action == Action.ROTATE:
-            action = self.rotate_piece_clockwise()
+            action_complete = self.rotate_piece_clockwise()
         elif action == Action.SWAP_HELD:
             self.swap_help_cur_piece()
 
         if action_complete:
-            self.last_ev = time()*1000
+            self.last_ev = time()
 
     def check_time_to_step(self):
         if self.game_over:
@@ -169,13 +169,12 @@ class Tetris:
             if not self.check_piece_done():
                 self.piece_done = False
 
-        elif self.last_step < self.GRAVITY:
+        elif (time() - self.last_step)*1000 < self.GRAVITY:
+
             self.done_delay = 0
-            self.last_step += self.clock.get_time()
             return False
 
         self.done_delay = self.DEFAULT_DELAY
-        self.last_step = 0
 
         return True
 
@@ -191,7 +190,9 @@ class Tetris:
             else:
                 self.lower_piece()
 
-        self.steps += 1
+            self.steps += 1
+            self.last_step = time()
+
         self.clock.tick(self.STEP_RATE)
 
     def get_projection(self):

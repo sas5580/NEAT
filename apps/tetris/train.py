@@ -76,4 +76,3 @@ with open(f'apps/tetris/genomes/{datetime.date.today()}_{org.fitness:.2f}.pickle
     pickle.dump(org, f)
 
 play_tetris_with_view(Network(org.genome.nodes, org.genome.bias_node, org.genome.connections))
-
