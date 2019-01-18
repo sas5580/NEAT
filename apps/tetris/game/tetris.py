@@ -4,10 +4,10 @@ from copy import deepcopy
 from time import time
 from pygame.time import Clock
 
-from config.tetris import HORIZONTAL_BLOCKS, VERTICAL_BLOCKS, SPAWN_POS, GRAVITY, MAX_DELAY, DELAY_LEEWAY, DEFAULT_DELAY, STEP_RATE
-from game.piece import Piece
-from game.piece_data import PieceType, RotationType
-from game.actions import Action
+from apps.tetris.config import HORIZONTAL_BLOCKS, VERTICAL_BLOCKS, SPAWN_POS, GRAVITY, MAX_DELAY, DELAY_LEEWAY, DEFAULT_DELAY, STEP_RATE
+from apps.tetris.game.piece import Piece
+from apps.tetris.game.piece_data import PieceType, RotationType
+from apps.tetris.game.actions import Action
 
 
 class Tetris:

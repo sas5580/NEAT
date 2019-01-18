@@ -2,8 +2,8 @@ import pygame as pg
 from pygame.locals import *
 from pygame.time import Clock
 
-from config.game import WINDOW_HEIGHT, WINDOW_WIDTH
-from view.tetris_view import TetrisView
+from apps.tetris.config import WINDOW_HEIGHT, WINDOW_WIDTH
+from apps.tetris.view.tetris_view import TetrisView
 
 class GameView:
     def __init__(self, game=None, ai_controller=None, ai_state=None):

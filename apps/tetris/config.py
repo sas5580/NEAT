@@ -1,4 +1,4 @@
-from game.piece_data import PieceType
+from apps.tetris.game.piece_data import PieceType
 
 # Game
 HORIZONTAL_BLOCKS = 10
@@ -14,6 +14,8 @@ STEP_RATE = 24 # per second
 
 
 # Display
+WINDOW_HEIGHT = 600 # px
+WINDOW_WIDTH = 450 # px
 BLOCK_SIZE = 30 # px
 LINES_SENT_SIZE = (50, 50)
 NEXT_BOX_SIZE = (100, 300)
@@ -33,3 +35,7 @@ PIECE_COLORS = {
 EMPTY_BLOCK_COLORS = ((30, 30, 30), (70, 70, 70))
 
 GRID_LINE_COLOR = (20, 20, 20)
+
+# Training
+NUM_GAMES_PER_GENOME = 5
+SPEED_MULTIPLIER_TRAINING = 100

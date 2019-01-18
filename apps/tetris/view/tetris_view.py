@@ -1,10 +1,10 @@
 import pygame as pg
 from pygame.locals import *
 
-from config.tetris import *
-from game.tetris import Tetris
-from game.piece_data import PieceType
-from game.actions import Action
+from apps.tetris.config import *
+from apps.tetris.game.tetris import Tetris
+from apps.tetris.game.piece_data import PieceType
+from apps.tetris.game.actions import Action
 
 
 class TetrisView:

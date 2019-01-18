@@ -1,13 +1,13 @@
 from copy import deepcopy
 
-from game.piece_data import PieceType, Rotation, RotationType, PIECE_SHAPE, get_roation_checks
+from apps.tetris.game.piece_data import PieceType, Rotation, RotationType, PIECE_SHAPE, get_roation_checks
 
 class Piece:
     def __init__(self, type_ : PieceType, topleft : tuple, rotation: Rotation = Rotation.ZERO):
         self.pos = topleft
         self.type = type_
         self.rotation = rotation
-    
+
     def check_rotation_pos_fits(self, board: list, rotation: Rotation = None, pos: tuple = None):
         if rotation is None: rotation = self.rotation
         if pos is None: pos = self.pos
@@ -47,7 +47,7 @@ class Piece:
         if not self.check_rotation_pos_fits(board, pos = (self.pos[0] + dx, self.pos[1] + dy)):
             raise Exception('Invalid translation')
         self.pos = (self.pos[0] + dx, self.pos[1] + dy)
-    
+
     def check_at_bottom(self, board: list):
         if not self.check_rotation_pos_fits(board):
             raise Exception('Invalid state at start of check_at_bottom')

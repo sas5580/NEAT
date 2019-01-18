@@ -3,11 +3,10 @@ import datetime
 import multiprocessing as mp
 import multiprocessing.dummy as threading
 
-from config.tetris import HORIZONTAL_BLOCKS, VERTICAL_BLOCKS, STEP_RATE
-from config.training import NUM_GAMES_PER_GENOME, SPEED_MULTIPLIER_TRAINING
-from game.actions import Action
-from game.tetris import Tetris
-from view.view import GameView
+from apps.tetris.config import HORIZONTAL_BLOCKS, VERTICAL_BLOCKS, STEP_RATE, NUM_GAMES_PER_GENOME, SPEED_MULTIPLIER_TRAINING
+from apps.tetris.game.actions import Action
+from apps.tetris.game.tetris import Tetris
+from apps.tetris.view.view import GameView
 from NEAT.network import Network
 from NEAT.neat import run_neat
 
@@ -23,7 +22,7 @@ def calculate_fitness(game):
 
 
 def play_tetris(network):
-    game = Tetris(speed_multiplier=1000.0)
+    game = Tetris(speed_multiplier=SPEED_MULTIPLIER_TRAINING)
     game.start()
     force_drop_count = 0
     while not game.game_over:
@@ -70,10 +69,10 @@ def play_tetris_with_view(network):
     view = GameView(game=game, ai_controller=make_move, ai_state={'force_drop_count': 0})
     view.run()
 
-org = run_neat(HORIZONTAL_BLOCKS*VERTICAL_BLOCKS, len(ACTION_MAP), tetris_fitness, population=100, generations=100)
+org = run_neat(HORIZONTAL_BLOCKS*VERTICAL_BLOCKS, len(ACTION_MAP), tetris_fitness, population=10, generations=10)
 
-with open(f'genomes/{datetime.date.today()}_{org.fitness:.2f}.pickle', 'wb') as f:
+with open(f'apps/tetris/genomes/{datetime.date.today()}_{org.fitness:.2f}.pickle', 'wb') as f:
     pickle.dump(org, f)
 
-#play_tetris_with_view(Network(org.genome.nodes, org.genome.bias_node, org.genome.connections))
+play_tetris_with_view(Network(org.genome.nodes, org.genome.bias_node, org.genome.connections))
 
