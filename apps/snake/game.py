@@ -9,10 +9,10 @@ from apps.snake.actions import Action
 
 class Snake:
     DIR_MAP = {
-        Action.LEFT: (0, -1),
-        Action.UP: (-1, 0),
-        Action.RIGHT: (0, 1),
-        Action.DOWN: (1, 0)
+        Action.LEFT: (-1, 0),
+        Action.UP: (0, -1),
+        Action.RIGHT: (1, 0),
+        Action.DOWN: (0, 1)
     }
 
     def __init__(self, speed_multiplier=1.0):
@@ -23,6 +23,7 @@ class Snake:
         self.last_step = 0
 
         self.direction = Action.RIGHT
+        self.prestep_direction = self.direction
         self.positions = deque(((3, 3), (3, 4), (3, 5)))
         self.food = None
         self.game_over = False
@@ -55,15 +56,15 @@ class Snake:
 
     def action(self, action):
         if self.game_over: return
-
         if Action.can_move(self.direction, action):
-            self.direction = action
+            self.prestep_direction = action
 
     def check_time_to_step(self):
         return (time() - self.last_step) * 1000 >= self.MOVE_RATE
 
     def step(self):
         if not self.game_over and self.check_time_to_step():
+            self.direction = self.prestep_direction
             self.move()
 
             self.last_step = time()
@@ -75,9 +76,9 @@ class Snake:
         s = ''
         for r in range(GRID_SIZE):
             for c in range(GRID_SIZE):
-                if (r, c) in self.positions:
+                if (c, r) in self.positions:
                     s += 'X'
-                elif (r, c) == self.food:
+                elif (c, r) == self.food:
                     s += 'O'
                 else:
                     s += ' '
