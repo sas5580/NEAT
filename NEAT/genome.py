@@ -222,7 +222,7 @@ class Genome:
 
     def mutate(self):
         #print('MUTATING')
-        self._mutate_one()
+        self._mutate_any()
         self.verify()
 
     def clone(self):

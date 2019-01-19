@@ -24,7 +24,7 @@ class Snake:
 
         self.direction = Action.RIGHT
         self.prestep_direction = self.direction
-        self.positions = deque(((3, 3), (4, 3), (5, 3)))
+        self.positions = deque()
         self.food = None
         self.game_over = False
 
@@ -32,6 +32,7 @@ class Snake:
         self.steps = 0
 
     def start(self):
+        self.positions.append((random.randint(0, GRID_SIZE - 1), random.randint(0, GRID_SIZE - 1)))
         self.spawn_food()
 
     def spawn_food(self):

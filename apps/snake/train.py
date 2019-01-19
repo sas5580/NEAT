@@ -25,7 +25,7 @@ class Output(Enum):
 
 
 def calculate_fitness(game):
-    return game.score * 100 + game.steps / 100
+    return game.score/game.steps*1000 + game.steps / 100
 
 def make_move(game, network, state=None):
     inp = []
@@ -51,15 +51,11 @@ def make_move(game, network, state=None):
         assert False
 
     inp.append(angle / math.pi)
-
-    scores = []
-    for out in Output:
-        scores.append(next(network.activate(inp + [out.value])))
+    scores = list(network.activate(inp))
 
     action = [Output.LEFT, Output.FORWARD, Output.RIGHT][
         scores.index(max(scores))
     ]
-
     game.action(Output.get_dir(action, game.direction))
 
 def play_snake(network):
@@ -68,8 +64,9 @@ def play_snake(network):
     game.start()
 
     no_score_change = 0
-    while not game.game_over and no_score_change < 500:
+    while not game.game_over and no_score_change < 400 and game.steps < 10000:
         score = game.score
+
         make_move(game, network)
         game.step()
 
@@ -79,27 +76,30 @@ def play_snake(network):
             no_score_change += 1
 
     fitness = calculate_fitness(game)
-    if no_score_change >= 500:
-        fitness -= 4.99
+    if no_score_change >= 400:
+        fitness -= 3.99
+
+    if game.steps >= 10000:
+        fitness += 1000
 
     return fitness
 
 def snake_fitness(network):
-    scores = (play_snake(network) for _ in range(5))
+    scores = (play_snake(network) for _ in range(10))
     return sum(scores) / 5
 
 def play_snake_with_view(network):
-    game = Snake()
+    game = Snake(speed_multiplier=3.0)
 
     move_fn = partial(make_move, game, network)
 
-    view = GameView(controller=SnakeView(game), ai_controller=move_fn)
+    view = GameView(controller=SnakeView(game), ai_controller=move_fn, ai_state=1)
     view.run()
 
-org = run_neat(5, 1, snake_fitness, population=200, generations=200)
+if __name__ == '__main__':
+    org = run_neat(4, 3, snake_fitness, population=100, generations=100)
 
-draw_genome(org.genome, 'best_snake')
-with open(f'apps/snake/genomes/{datetime.date.today()}_{org.fitness:.2f}.pickle', 'wb') as f:
-    pickle.dump(org, f)
+    with open(f'apps/snake/genomes/{datetime.date.today()}_{org.fitness:.4f}.pickle', 'wb') as f:
+        pickle.dump(org, f)
 
-#play_snake_with_view(Network(org.genome.nodes, org.genome.bias_node, org.genome.connections))
+    play_snake_with_view(Network(org.genome.nodes, org.genome.bias_node, org.genome.connections))
