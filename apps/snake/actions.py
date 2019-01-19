@@ -5,6 +5,7 @@ class Action(Enum):
     UP = 1
     RIGHT = 2
     DOWN = 3
+    SIZE = 4
 
     @classmethod
     def can_move(cls, cur, to):

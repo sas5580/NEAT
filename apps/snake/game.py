@@ -24,7 +24,7 @@ class Snake:
 
         self.direction = Action.RIGHT
         self.prestep_direction = self.direction
-        self.positions = deque(((3, 3), (3, 4), (3, 5)))
+        self.positions = deque(((3, 3), (4, 3), (5, 3)))
         self.food = None
         self.game_over = False
 
@@ -41,7 +41,6 @@ class Snake:
     def move(self):
         diff = Snake.DIR_MAP[self.direction]
         nxt = (self.positions[-1][0] + diff[0], self.positions[-1][1] + diff[1])
-
         if nxt[0] < 0 or nxt[0] >= GRID_SIZE or nxt[1] < 0 or nxt[1] >= GRID_SIZE or nxt in self.positions:
             self.game_over = True
             return
