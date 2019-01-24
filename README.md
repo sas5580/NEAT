@@ -13,7 +13,8 @@ Haven't been able to get a great Tetris model going, but I'm working on it!
 Make sure you are using Python3.6+ (for the sweet sweet fstrings)
 #### Setup
 Install the dependancies using pip  
-`pip install -r requirements.txt`
+`pip install -r requirements.txt`  
+Also make sure you have TkInter installed on your machine for Python3.
 
 Make sure the root directory of the repo is in the python path, as we will run everything from there.  
 `export PYTHONPATH=$PYTHONPATH:.` (while in the root directory)
