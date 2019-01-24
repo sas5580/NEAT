@@ -14,7 +14,8 @@ Make sure you are using Python3.6+ (for the sweet sweet fstrings)
 #### Setup
 Install the dependancies using pip  
 `pip install -r requirements.txt`  
-Also make sure you have TkInter installed on your machine for Python3.
+Also make sure you have TkInter installed on your machine for Python3.  
+E.g. (For Ubuntu) `sudo apt install python3-tk`
 
 Make sure the root directory of the repo is in the python path, as we will run everything from there.  
 `export PYTHONPATH=$PYTHONPATH:.` (while in the root directory)
