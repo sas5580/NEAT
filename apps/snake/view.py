@@ -1,7 +1,7 @@
 import pygame as pg
 from pygame.locals import *
 
-from apps.snake.config import BLOCK_SIZE, GRID_SIZE, BACKGROUND_COLOUR, SNAKE_COLOUR, FOOD_COLOUR
+from apps.snake.config import BLOCK_SIZE, GRID_SIZE, BACKGROUND_COLOUR, SNAKE_COLOUR, HEAD_COLOUR, FOOD_COLOUR
 from apps.snake.game import Snake
 from apps.snake.actions import Action
 
@@ -24,6 +24,8 @@ class SnakeView:
                 rect = (c*BLOCK_SIZE, r*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
                 if (c, r) == self.game.food:
                     pg.draw.rect(self.surface, FOOD_COLOUR, rect, 0)
+                elif (c, r) == self.game.positions[-1]:
+                    pg.draw.rect(self.surface, HEAD_COLOUR, rect, 0)
                 elif (c, r) in self.game.positions:
                     pg.draw.rect(self.surface, SNAKE_COLOUR, rect, 0)
                 else:
