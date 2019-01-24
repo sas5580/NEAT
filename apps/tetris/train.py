@@ -70,7 +70,7 @@ def play_tetris_with_view(network):
     view = GameView(controller=TetrisView(game), ai_controller=make_move, ai_state={'force_drop_count': 0})
     view.run()
 
-org = run_neat(HORIZONTAL_BLOCKS*VERTICAL_BLOCKS, len(ACTION_MAP), tetris_fitness, population=10, generations=2)
+org = run_neat(HORIZONTAL_BLOCKS*VERTICAL_BLOCKS, len(ACTION_MAP), tetris_fitness)
 
 with open(f'apps/tetris/genomes/{datetime.date.today()}_{org.fitness:.2f}.pickle', 'wb') as f:
     pickle.dump(org, f)

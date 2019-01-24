@@ -105,7 +105,7 @@ def play_snake_with_view(organism):
     view.run()
 
 if __name__ == '__main__':
-    org = run_neat(4, 3, snake_fitness, population=100, generations=100)
+    org = run_neat(4, 3, snake_fitness)
 
     with open(f'apps/snake/genomes/{datetime.date.today()}_{org.fitness:.4f}.pickle', 'wb') as f:
         pickle.dump(org, f)
