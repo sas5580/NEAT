@@ -94,10 +94,10 @@ def snake_fitness(network):
     scores = (play_snake(network) for _ in range(10))
     return sum(scores) / 5
 
-def play_snake_with_view(organism):
+def play_snake_with_view(organism, speed_multiplier=3.0):
     network = Network(organism.genome.nodes, organism.genome.bias_node, organism.genome.connections)
 
-    game = Snake(speed_multiplier=3.0)
+    game = Snake(speed_multiplier=speed_multiplier)
 
     move_fn = partial(make_move, game, network)
 
