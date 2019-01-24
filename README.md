@@ -2,7 +2,7 @@
 A NeuroEvolution of Augmenting Topoligies library to evolve a nerual network to perform any task given inputs, outputs, and a fitness function.
 
 ## Apps
-Currently, Snake and Tetris exist to test the capabilities of the library (and because AI playing games is really cool!)
+Currently, Snake and Tetris exist to test the capabilities of the library (and because AI playing games is really cool!)  
 Below is one of the better results from using the library to learn to play Snake
 
 ![](https://media.giphy.com/media/1g1bbHK2MC9fpb4ap6/giphy.gif)
