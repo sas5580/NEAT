@@ -23,7 +23,7 @@ class GameView:
         self.controller.on_event(event)
 
     def on_loop(self):
-        self.controller.loop()
+        return self.controller.loop()
 
     def on_render(self):
         self._display.blit(self.controller.draw(), (0, 0))
@@ -46,6 +46,7 @@ class GameView:
             else:
                 self.ai_controller(self.ai_state)
 
-            self.on_loop()
+            if not self.on_loop():
+                self._running = False
             self.on_render()
         self.on_cleanup()

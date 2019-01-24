@@ -63,3 +63,4 @@ class TetrisView:
 
     def loop(self):
         self.game.step()
+        return not self.game.game_over
